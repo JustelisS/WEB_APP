@@ -1,37 +1,64 @@
-Vue.component('todo-item', {
-  props: ['task'],
-  template: '<li>{{ task.text }}</li>'
-})
 
-
-var app = new Vue({
-  el:'#app',
+const login = new Vue({
+  el:'#log',
   data: {
-    textbox: "",
-    todos: []
+    username: '',
+    password: '',
+    users: []
   },
   methods: {
-    addTodo: function() {
-      app.todos.push({text: this.textbox})
+
+    changeStatus: function() {
+      this.getUsers();
+      if(doesExist().value) {
+        this.users.isSignedIn = true;
+      } else {
+        alert("Invalid Information");
+      }
+    },
+
+    doesExist: function() {
+      for(let user = 0; user < this.users.length; user++) {
+        if(this.users[user].username == this.username &&
+            this.users[user].password == this.password) {
+          return {
+                  value: true,
+                  position: user
+                };
+
+        }
+      }
+
+    },
+
+    getUsers: function() {
+      if(localStorage.getItem("users") == null) {
+        this.users = [];
+
+      } else {
+        this.users = JSON.parse(localStorage.getItem("users"));
+      }
     }
+
+
   }
 })
 
-
-var registration = new Vue({
+const registration = new Vue({
   el:'#reg',
   data: {
-    userType: "",
+    usertype: "",
     username: "",
     password: "",
     users: []
   },
 
+
   methods: {
 
     addUser: function() {
       this.getUsers();
-      if(this.username == '' || this.password == '' || this.userType == '') {
+      if(this.username == '' || this.password == '' || this.usertype == '') {
         //do nothing
 
       } else if(this.invalidDetails()){
@@ -42,10 +69,10 @@ var registration = new Vue({
 
       } else {
           this.users.push({
-            userType: this.userType,
+            usertype: this.usertype,
             username: this.username,
             password: this.password,
-            isSignedIn: "false",
+            isSignedIn: false,
           });
           localStorage.setItem("users", JSON.stringify(this.users));
           alert("You Have Successfully Registered");

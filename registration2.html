@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="script2.js" defer></script>
+  </head>
+  <body>
+    <header>
+
+    </header>
+    <main>
+      <div id="reg">
+        <form>
+          <input type="radio" name="type" value="user" v-model="usertype" required> User <br>
+          <input type="radio" name="type" value="creator" v-model="usertype" required> Creator <br>
+          <input v-model='username' required>
+          <input type="password" v-model='password' required>
+          <button v-on:click='addUser'>SIGN UP</button>
+       </form>
+      </div>
+
+      <div id="log">
+        <form>
+          <input v-model='username'>
+          <input type="password" v-model='password'>
+          <button v-on:click='changeStatus'>Log In</button>
+        </form>
+      </div>
+    </main>
+
+    
+  </body>
+</html>

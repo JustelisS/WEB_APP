@@ -1,38 +1,23 @@
-
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   </head>
   <body>
-    <div id='app' style='display: none' >
-      <h1> Task Manager </h1>
-      <ul>
-        <todo-item
-          v-for='item in todos'
-          v-bind:task='item'
-          v-bind:key='item.id'
-          style='text-align: left'
-        ></todo-item>
-      </ul>
-      <input v-model='textbox'>
-      <button v-on:click='addTodo'>AddTask</button>
+    <div id="main">
+      <nav v-bind:class="active" v-on:click.prevent>
+        <a href="#" class="home" v-on:click="makeActive('COURSES')">Home</a>
+        <a href="registration.html" class="projects" v-on:click="makeActive('SIGN UP')">Projects</a>
+      </nav>
 
+      <p>You chose <b>{{ active }}</b></p>
     </div>
 
-    <div id='reg'>
-      <h1> SIGN UP </h1>
-      <form>
-        <input type="radio" name="type" value="user" v-model="userType" required> User <br>
-        <input type="radio" name="type" value="creator" v-model="userType" required> Creator <br>
-        <input v-model='username' required>
-        <input type="password" v-model='password' required>
-        <button v-on:click='addUser'>SIGN UP</button>
-      </form>
-    </div>
 
-    <script src="script.js"></script>
+
 
   </body>
 </html>
