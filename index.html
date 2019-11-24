@@ -1,23 +1,40 @@
-<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <title></title>
-    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="styles.css">
   </head>
   <body>
-    <div id="main">
-      <nav v-bind:class="active" v-on:click.prevent>
-        <a href="#" class="home" v-on:click="makeActive('COURSES')">Home</a>
-        <a href="registration.html" class="projects" v-on:click="makeActive('SIGN UP')">Projects</a>
-      </nav>
-
-      <p>You chose <b>{{ active }}</b></p>
-    </div>
+    <!-- template for the modal component -->
 
 
+<!-- app -->
+<div id="app">
+  <nav>
+    <a id="show-reg-modal" v-if="!isLogedIn" @click="showLogModal = true">LOGIN</a>
+    <a id="show-log-modal" v-if="!isLogedIn" @click="showRegModal = true">SIGN UP</a>
+    <a id="show-log-modal" v-if="isLogedIn" @click="showAddCourseModal = true">ADD COURSE</a>
+    <a id="show-log-modal" v-if="isLogedIn" @click="logout">LOG OUT</a>
+  </nav>
+
+  <log-in v-if="showLogModal"
+          @close="showLogModal = false">
+
+  </log-in>
+
+  <sign-up v-if="showRegModal"
+         @close="showRegModal = false">
+
+    <h3 slot="header">custom header</h3>
+  </sign-up>
 
 
+
+
+</div>
+
+<script src="script.js"></script>
   </body>
 </html>
