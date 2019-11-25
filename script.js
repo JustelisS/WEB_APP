@@ -1,3 +1,114 @@
+Vue.component('add-course', {
+  props: ['logedInUser'],
+  data: function() {
+    return {
+      courses: [],
+      topic: '',
+      description: '',
+      price: null,
+      county: '',
+      postcode: '',
+      day: '',
+      time: '',
+      length: 0,
+      counties: ['hendon',
+                 'colindale',
+                 'barnet'],
+      days: [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ]
+    }
+  },
+  template: `<transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+
+          <div class="modal-header">
+            <slot name="header">
+              default header
+            </slot>
+          </div>
+
+          <div class="modal-body">
+            <slot name="body">
+            <form>
+              <label for="topic">Topic</label></br>
+              <input id="topic" v-model='topic' required></br>
+              <label for="price">Price</label></br>
+              <input id="price" v-model='price' required></br>
+              <label for="location">Location</label></br>
+              <input id="location" type="text" v-model="county" list="counties"></br>
+              <datalist id="counties">
+                <option v-for="county in counties">{{county}}</option>
+              </datalist>
+              <label for="postcode">Postcode</label></br>
+              <input id="postcode" v-model='postcode' required></br>
+              <label for="day">Days</label></br>
+              <input id="day" type="text" v-model="day" list="days"></br>
+              <datalist id="days">
+                <option v-for="day in days">{{day}}</option>
+              </datalist>
+              <label for="time">Time</label></br>
+              <input id="time" v-model='time' required></br>
+              <label for="length">Length</label></br>
+              <input id="length" v-model='length' required></br>
+              <label for="description">Description</label></br>
+              <input type="text" id="description" v-model='description'></br>
+              <button v-on:click="addCourse">ADD COURSE</button>
+            </form>
+            </slot>
+          </div>
+
+          <div class="modal-footer">
+            <slot name="footer">
+              default footer
+              <button class="modal-default-button" @click="$emit('close')">
+                OK
+              </button>
+            </slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>`,
+
+  methods: {
+
+    addCourse: function() {
+      this.getCourses();
+      this.courses.push({
+        topic: this.topic,
+        price: this.price,
+        county: this.county,
+        postcode: this.postcode,
+        day: this.day,
+        time: this.time,
+        length: this.length,
+        description: this.description,
+        author: this.logedInUser
+      });
+      localStorage.setItem("courses", JSON.stringify(this.courses));
+    },
+
+    getCourses: function() {
+      if(localStorage.getItem("courses") == null) {
+        this.courses = [];
+
+      } else {
+        this.courses = JSON.parse(localStorage.getItem("courses"));
+      }
+    }
+
+  }
+})
+
 Vue.component('log-in', {
   data: function() {
     return {
@@ -179,7 +290,10 @@ const app = new Vue({
     showLogModal: false,
     showAddCourseModal: false,
     isLogedIn: false,
-    logedInUser: '',
+    status: {
+      logedInUser: '',
+      usertype: ''
+    },
     users: []
   },
   methods: {
@@ -191,12 +305,12 @@ const app = new Vue({
           console.log('got it');
           this.isLogedIn = true;
           this.logedInUser = this.users[user].username;
-          return true;
+          this.usertype = this.users[user].usertype;
           break;
         } else {
           this.isLogedIn = false;
           this.logedInUser = '';
-          return false;
+          this.usertype = '';
         }
       }
     },
@@ -216,6 +330,8 @@ const app = new Vue({
         localStorage.setItem("users", JSON.stringify(this.users));
       }
       this.isLogedIn = false;
+      this.logedInUser = '';
+      this.usertype = '';
     }
   },
 

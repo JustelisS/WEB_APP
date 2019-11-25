@@ -13,27 +13,31 @@
 <!-- app -->
 <div id="app">
   <nav>
-    <a id="show-reg-modal" v-if="!isLogedIn" @click="showLogModal = true">LOGIN</a>
+    <a id="show-log-modal" v-if="!isLogedIn" @click="showLogModal = true">LOGIN</a>
     <a id="show-log-modal" v-if="!isLogedIn" @click="showRegModal = true">SIGN UP</a>
-    <a id="show-log-modal" v-if="isLogedIn" @click="showAddCourseModal = true">ADD COURSE</a>
+    <a id="show-log-modal" v-if="isLogedIn && usertype == 'creator'" @click="showAddCourseModal = true">ADD COURSE</a>
+    <a id="show-log-modal" v-if="isLogedIn && usertype == 'creator'" @click="">MY COURSES</a>
     <a id="show-log-modal" v-if="isLogedIn" @click="logout">LOG OUT</a>
   </nav>
 
   <log-in v-if="showLogModal"
           @close="showLogModal = false">
-
   </log-in>
 
   <sign-up v-if="showRegModal"
          @close="showRegModal = false">
-
     <h3 slot="header">custom header</h3>
   </sign-up>
 
-
+  <add-course v-if="showAddCourseModal"
+              @close="showAddCourseModal = false"
+              v-bind:loged-in-user="logedInUser">
+  </add-course>
 
 
 </div>
+
+
 
 <script src="script.js"></script>
   </body>
