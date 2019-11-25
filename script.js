@@ -1,3 +1,47 @@
+Vue.component('course-list', {
+  data: function() {
+    return {
+      search: '',
+      courses: []
+    }
+  },
+
+  template: `
+
+            <div>
+              <div class="search-wrapper">
+                <input type="text" v-model="search" placeholder="Search title.."/>
+                <label>Search title:</label>
+              </div>
+
+              <div v-for="course in filteredList">
+                {{course}}
+              </div>
+            </div>`,
+
+  computed: {
+    filteredList() {
+      this.getCourses();
+      return this.courses.filter(course => {
+        return course.topic.toLowerCase().includes(this.search.toLowerCase());
+      })
+    }
+  },
+
+  methods: {
+
+    getCourses: function() {
+      if(localStorage.getItem("courses") == null) {
+        this.courses = [];
+
+      } else {
+        this.courses = JSON.parse(localStorage.getItem("courses"));
+      }
+    }
+  }
+
+})
+
 Vue.component('add-course', {
   props: ['logedInUser'],
   data: function() {
@@ -42,7 +86,7 @@ Vue.component('add-course', {
               <label for="topic">Topic</label></br>
               <input id="topic" v-model='topic' required></br>
               <label for="price">Price</label></br>
-              <input id="price" v-model='price' required></br>
+              <input id="price" v-model.number='price' required></br>
               <label for="location">Location</label></br>
               <input id="location" type="text" v-model="county" list="counties"></br>
               <datalist id="counties">
@@ -58,7 +102,7 @@ Vue.component('add-course', {
               <label for="time">Time</label></br>
               <input id="time" v-model='time' required></br>
               <label for="length">Length</label></br>
-              <input id="length" v-model='length' required></br>
+              <input id="length" v-model.number='length' required></br>
               <label for="description">Description</label></br>
               <input type="text" id="description" v-model='description'></br>
               <button v-on:click="addCourse">ADD COURSE</button>
@@ -107,6 +151,8 @@ Vue.component('add-course', {
     }
 
   }
+
+
 })
 
 Vue.component('log-in', {
