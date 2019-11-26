@@ -16,7 +16,7 @@
     <a id="show-log-modal" v-if="!isLogedIn" @click="showLogModal = true">LOGIN</a>
     <a id="show-log-modal" v-if="!isLogedIn" @click="showRegModal = true">SIGN UP</a>
     <a id="show-log-modal" v-if="isLogedIn && usertype == 'creator'" @click="showAddCourseModal = true">ADD COURSE</a>
-    <a id="show-log-modal" v-if="isLogedIn && usertype == 'creator'" @click="">MY COURSES</a>
+    <a id="show-log-modal" v-if="isLogedIn && usertype == 'creator'" @click="showMyCoursesModal = true">MY COURSES</a>
     <a id="show-log-modal" v-if="isLogedIn" @click="logout">LOG OUT</a>
   </nav>
 
@@ -34,14 +34,22 @@
               v-bind:loged-in-user="logedInUser">
   </add-course>
 
-  <course-list>
+  <my-courses v-if="showMyCoursesModal"
+              @close="showMyCoursesModal = false"
+              v-bind:loged-in-user="logedInUser">
+  </my-courses>
+
+  </br>
+
+  <course-list v-bind:topics="topics"
+               v-bind:prices="prices">
   </course-list>
 
 
 
 </div>
 
-
+</div>
 
 <script src="script.js"></script>
   </body>

@@ -1,30 +1,96 @@
 Vue.component('course-list', {
+  props: ['topics', 'prices'],
   data: function() {
     return {
       search: '',
-      courses: []
+      courses: [],
+      selectedTopic: '',
+      selectedPrice: '',
+      sorting: '',
+      sortingType: ''
     }
   },
 
   template: `
-
             <div>
-              <div class="search-wrapper">
-                <input type="text" v-model="search" placeholder="Search title.."/>
-                <label>Search title:</label>
+              <div style="display:flex;">
+                <div class="search-wrapper">
+                  <label>Search title</label></br>
+                  <input type="text" v-model="search">
+                </div>
+
+                <div>
+                  <label>Filter</label></br>
+                  <select v-model="selectedTopic" placeholder="Topic filter">
+                    <option></option>
+                    <option v-for="topic in topics">{{topic}}</option>
+                  </select>
+
+                  <!--<select v-model="selectedPrice">
+                    <option></option>
+                    <option v-for="price in prices">{{price}}</option>
+                  </select>-->
+
+                </div>
+
+                <div>
+                  <label>Sort</label></br>
+                  <select v-model="sorting">
+                    <option></option>
+                    <option>Alphabetically</option>
+                    <option>Price</option>
+                  </select>
+
+                  <input type="radio" name="type" value="ascending" v-model="sortingType"> Ascending
+                  <input type="radio" name="type" value="descending" v-model="sortingType"> Descending
+
+                </div>
               </div>
 
-              <div v-for="course in filteredList">
+              <div v-for="course in filteredSortedList">
                 {{course}}
               </div>
             </div>`,
 
   computed: {
-    filteredList() {
+    searchList() {
       this.getCourses();
       return this.courses.filter(course => {
         return course.topic.toLowerCase().includes(this.search.toLowerCase());
       })
+    },
+
+    filteredList() {
+      return this.searchList.filter(course => {
+        return course.topic.toLowerCase().includes(this.selectedTopic.toLowerCase());
+
+      })
+    },
+
+    filteredSortedList() {
+      if(this.sorting === 'Alphabetically') {
+        if(this.sortingType === 'ascending') {
+          return this.filteredList.sort((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0));
+        } else if(this.sortingType === 'descending') {
+          return this.filteredList.sort((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0)).reverse();
+        } else {
+          this.sortingType = 'ascending';
+          return this.filteredList.sort((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0));
+        }
+      } else if(this.sorting === 'Price') {
+        if(this.sortingType === 'ascending') {
+          return this.filteredList.sort((a,b) => (a.price > b.price) ? 1 : ((b.price > a.price) ? -1 : 0));
+        } else if(this.sortingType === 'descending') {
+          return this.filteredList.sort((a,b) => (a.price > b.price) ? 1 : ((b.price > a.price) ? -1 : 0)).reverse();
+        } else {
+          this.sortingType = 'ascending';
+          return this.filteredList.sort((a,b) => (a.price > b.price) ? 1 : ((b.price > a.price) ? -1 : 0));
+        }
+      } else {
+        this.sorting = '';
+        this.sortingType = '';
+        return this.filteredList;
+      }
     }
   },
 
@@ -40,6 +106,75 @@ Vue.component('course-list', {
     }
   }
 
+})
+
+Vue.component('my-courses', {
+  props: ['logedInUser'],
+  data: function() {
+    return {
+      courses: []
+    }
+  },
+
+  template: `<transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+
+          <div class="modal-header">
+            <slot name="header">
+              default header
+            </slot>
+          </div>
+
+          <div class="modal-body">
+            <slot name="body">
+            <div v-for="course in myCourses">
+              {{course}}
+              <button @click="$emit('close')">Delete</button>
+            </div>
+            </slot>
+          </div>
+
+          <div class="modal-footer">
+            <slot name="footer">
+              default footer
+              <button class="modal-default-button" @click="$emit('close')">
+                OK
+              </button>
+            </slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>`,
+
+  computed: {
+    myCourses() {
+      this.getCourses();
+      return this.courses.filter(course => {
+        return course.author.toLowerCase().includes(this.logedInUser.toLowerCase());
+      })
+    }
+  },
+
+  methods: {
+
+    getCourses: function() {
+      if(localStorage.getItem("courses") == null) {
+        this.courses = [];
+
+      } else {
+        this.courses = JSON.parse(localStorage.getItem("courses"));
+      }
+    },
+
+    deleteCourse: function() {
+      for(let user = 0; user < this.users.lenght; user++) {
+
+      }
+    }
+  }
 })
 
 Vue.component('add-course', {
@@ -66,6 +201,15 @@ Vue.component('add-course', {
         'Friday',
         'Saturday',
         'Sunday'
+      ],
+      topics: [
+        'Math',
+        'Physics',
+        'Astrology',
+        'Computer Science',
+        'Sports',
+        'Cooking',
+        'Driving'
       ]
     }
   },
@@ -84,27 +228,35 @@ Vue.component('add-course', {
             <slot name="body">
             <form>
               <label for="topic">Topic</label></br>
-              <input id="topic" v-model='topic' required></br>
+              <select v-model="topic" id="topic">
+                <option v-for="topic in topics">{{topic}}</option>
+              </select> </br>
+
               <label for="price">Price</label></br>
               <input id="price" v-model.number='price' required></br>
-              <label for="location">Location</label></br>
-              <input id="location" type="text" v-model="county" list="counties"></br>
-              <datalist id="counties">
+
+              <label for="counties">Location</label></br>
+              <select v-model="county" id="counties">
                 <option v-for="county in counties">{{county}}</option>
-              </datalist>
+              </select> </br>
+
               <label for="postcode">Postcode</label></br>
               <input id="postcode" v-model='postcode' required></br>
-              <label for="day">Days</label></br>
-              <input id="day" type="text" v-model="day" list="days"></br>
-              <datalist id="days">
+
+              <label for="days">Days</label></br>
+              <select v-model="day" id="days">
                 <option v-for="day in days">{{day}}</option>
-              </datalist>
+              </select> </br>
+
               <label for="time">Time</label></br>
               <input id="time" v-model='time' required></br>
+
               <label for="length">Length</label></br>
               <input id="length" v-model.number='length' required></br>
+
               <label for="description">Description</label></br>
               <input type="text" id="description" v-model='description'></br>
+
               <button v-on:click="addCourse">ADD COURSE</button>
             </form>
             </slot>
@@ -335,12 +487,27 @@ const app = new Vue({
     showRegModal: false,
     showLogModal: false,
     showAddCourseModal: false,
+    showMyCoursesModal: false,
     isLogedIn: false,
     status: {
       logedInUser: '',
       usertype: ''
     },
-    users: []
+    users: [],
+    topics: [
+      'Math',
+      'Physics',
+      'Astrology',
+      'Computer Science',
+      'Sports',
+      'Cooking',
+      'Driving'
+    ],
+    prices: [
+      '0-50',
+      '50-100',
+      '>100'
+    ]
   },
   methods: {
 
