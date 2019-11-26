@@ -1,9 +1,10 @@
+//Vue component for diplaying course list in localstorage.
+//Includes search, sorting and filtering
 Vue.component('course-list', {
-  props: ['topics', 'prices'],
+  props: ['topics', 'prices', 'courses'],
   data: function() {
     return {
       search: '',
-      courses: [],
       selectedTopic: '',
       selectedPrice: '',
       sorting: '',
@@ -54,7 +55,7 @@ Vue.component('course-list', {
 
   computed: {
     searchList() {
-      this.getCourses();
+      //this.getCourses();
       return this.courses.filter(course => {
         return course.topic.toLowerCase().includes(this.search.toLowerCase());
       })
@@ -92,35 +93,15 @@ Vue.component('course-list', {
         return this.filteredList;
       }
     }
-  },
-
-  /*watch: {
-    courses: function (val) {
-      this.getCourses();
-    }
-  },*/
-
-  methods: {
-
-    getCourses: function() {
-      if(localStorage.getItem("courses") == null) {
-        this.courses = [];
-
-      } else {
-        this.courses = JSON.parse(localStorage.getItem("courses"));
-      }
-    }
   }
 
 })
 
+
+//Vue component for displaying courses that have been submited bu currently
+//loged in user
 Vue.component('my-courses', {
-  props: ['logedInUser'],
-  data: function() {
-    return {
-      courses: []
-    }
-  },
+  props: ['logedInUser', 'courses'],
 
   template: `<transition name="modal">
     <div class="modal-mask">
@@ -144,9 +125,8 @@ Vue.component('my-courses', {
 
           <div class="modal-footer">
             <slot name="footer">
-              default footer
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                CLOSE
               </button>
             </slot>
           </div>
@@ -156,8 +136,8 @@ Vue.component('my-courses', {
   </transition>`,
 
   computed: {
+
     myCourses() {
-      this.getCourses();
       return this.courses.filter(course => {
         return course.author.toLowerCase().includes(this.logedInUser.toLowerCase());
       })
@@ -165,15 +145,6 @@ Vue.component('my-courses', {
   },
 
   methods: {
-
-    getCourses: function() {
-      if(localStorage.getItem("courses") == null) {
-        this.courses = [];
-
-      } else {
-        this.courses = JSON.parse(localStorage.getItem("courses"));
-      }
-    },
 
     deleteCourse: function(courseId) {
       console.log(courseId);
@@ -185,15 +156,14 @@ Vue.component('my-courses', {
       }
     }
   }
-
 })
 
+//Vue component for adding courses by creator type users
 Vue.component('add-course', {
-  props: ['logedInUser'],
+  props: ['logedInUser', 'courses'],
   data: function() {
     return {
       id: 0,
-      courses: [],
       topic: '',
       description: '',
       price: null,
@@ -225,6 +195,7 @@ Vue.component('add-course', {
       ]
     }
   },
+
   template: `<transition name="modal">
     <div class="modal-mask">
       <div class="modal-wrapper">
@@ -276,9 +247,8 @@ Vue.component('add-course', {
 
           <div class="modal-footer">
             <slot name="footer">
-              default footer
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                CLOSE
               </button>
             </slot>
           </div>
@@ -287,14 +257,9 @@ Vue.component('add-course', {
     </div>
   </transition>`,
 
-  computed: {
-
-  },
-
   methods: {
 
     addCourse: function() {
-      this.getCourses();
       if(this.topic !== '' && this.price !== null && this.county !== '' &&
          this.postcode !== '' && this.day !== '' && this.time !== '' &&
          this.length !== null && this.description !== '') {
@@ -313,15 +278,6 @@ Vue.component('add-course', {
            });
            localStorage.setItem("courses", JSON.stringify(this.courses));
          }
-    },
-
-    getCourses: function() {
-      if(localStorage.getItem("courses") == null) {
-        this.courses = [];
-
-      } else {
-        this.courses = JSON.parse(localStorage.getItem("courses"));
-      }
     },
 
     setId: function() {
@@ -345,12 +301,13 @@ Vue.component('add-course', {
   }
 })
 
+//Vue component for displaying login form and for changing user's login status
 Vue.component('log-in', {
+  props: ['users'],
   data: function() {
     return {
       username: "",
-      password: "",
-      users: []
+      password: ""
     }
   },
   template: `<transition name="modal">
@@ -367,7 +324,9 @@ Vue.component('log-in', {
           <div class="modal-body">
             <slot name="body">
             <form>
-              <input v-model='username' required>
+              <label>Email</label></br>
+              <input v-model='username' required> </br>
+              <label>Password</label></br>
               <input type="password" v-model='password' required>
               <button v-on:click="logIn">LOG IN</button>
             </form>
@@ -376,9 +335,9 @@ Vue.component('log-in', {
 
           <div class="modal-footer">
             <slot name="footer">
-              default footer
+
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                CLOSE
               </button>
             </slot>
           </div>
@@ -390,7 +349,6 @@ Vue.component('log-in', {
   methods: {
 
     logIn: function(){
-      this.getUsers();
       for(let user = 0; user < this.users.length; user++) {
         if(this.users[user].username == this.username &&
            this.users[user].password == this.password) {
@@ -399,29 +357,21 @@ Vue.component('log-in', {
              break;
         }
       }
-    },
-
-    getUsers: function() {
-      if(localStorage.getItem("users") == null) {
-        this.users = [];
-
-      } else {
-        this.users = JSON.parse(localStorage.getItem("users"));
-      }
     }
 
   }
 })
 
 
-// register modal component
+//Vue component that displays sign up form and inserts new user into localStorage
+//given the information provided is valid
 Vue.component('sign-up', {
+  props: ['users'],
   data: function() {
     return {
       usertype: "",
       username: "",
-      password: "",
-      users: []
+      password: ""
     }
   },
   template: `<transition name="modal">
@@ -440,7 +390,9 @@ Vue.component('sign-up', {
             <form>
               <input type="radio" name="type" value="user" v-model="usertype" required> User <br>
               <input type="radio" name="type" value="creator" v-model="usertype" required> Creator <br>
-              <input v-model='username' required>
+              <label>Email</label></br>
+              <input v-model='username' required></br>
+              <label>Email</label></br>
               <input type="password" v-model='password' required>
               <button v-on:click='addUser'>SIGN UP</button>
             </form>
@@ -449,9 +401,8 @@ Vue.component('sign-up', {
 
           <div class="modal-footer">
             <slot name="footer">
-              default footer
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                CLOSE
               </button>
             </slot>
           </div>
@@ -463,7 +414,6 @@ Vue.component('sign-up', {
   methods: {
 
     addUser: function() {
-      this.getUsers();
       if(this.username == '' || this.password == '' || this.usertype == '') {
         //do nothing
 
@@ -478,21 +428,12 @@ Vue.component('sign-up', {
             usertype: this.usertype,
             username: this.username,
             password: this.password,
-            isSignedIn: false,
+            isSignedIn: false
           });
           localStorage.setItem("users", JSON.stringify(this.users));
           alert("You Have Successfully Registered");
           $emit('close');
 
-      }
-    },
-
-    getUsers: function() {
-      if(localStorage.getItem("users") == null) {
-        this.users = [];
-
-      } else {
-        this.users = JSON.parse(localStorage.getItem("users"));
       }
     },
 
@@ -532,6 +473,7 @@ const app = new Vue({
       usertype: ''
     },
     users: [],
+    courses: [],
     topics: [
       'Math',
       'Physics',
@@ -551,6 +493,7 @@ const app = new Vue({
 
     loginStatus: function() {
       this.getUsers();
+      this.getCourses();
       for(let user = 0; user < this.users.length; user++) {
         if(this.users[user].isSignedIn) {
           console.log('got it');
@@ -583,6 +526,24 @@ const app = new Vue({
       this.isLogedIn = false;
       this.logedInUser = '';
       this.usertype = '';
+    },
+
+    getUsers: function() {
+      if(localStorage.getItem("users") == null) {
+        this.users = [];
+
+      } else {
+        this.users = JSON.parse(localStorage.getItem("users"));
+      }
+    },
+
+    getCourses: function() {
+      if(localStorage.getItem("courses") == null) {
+        this.courses = [];
+
+      } else {
+        this.courses = JSON.parse(localStorage.getItem("courses"));
+      }
     }
   },
 
