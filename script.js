@@ -94,6 +94,12 @@ Vue.component('course-list', {
     }
   },
 
+  /*watch: {
+    courses: function (val) {
+      this.getCourses();
+    }
+  },*/
+
   methods: {
 
     getCourses: function() {
@@ -129,9 +135,9 @@ Vue.component('my-courses', {
 
           <div class="modal-body">
             <slot name="body">
-            <div v-for="course in myCourses">
+            <div v-for="course in myCourses" v-bind:id="course.id">
               {{course}}
-              <button @click="$emit('close')">Delete</button>
+              <button @click="deleteCourse(course.id)">Delete</button>
             </div>
             </slot>
           </div>
@@ -169,18 +175,24 @@ Vue.component('my-courses', {
       }
     },
 
-    deleteCourse: function() {
-      for(let user = 0; user < this.users.lenght; user++) {
-
+    deleteCourse: function(courseId) {
+      console.log(courseId);
+      for(let course = 0; course < this.courses.length; course++) {
+        if(this.courses[course].id === courseId) {
+          this.courses.splice(course, 1);
+          localStorage.setItem("courses", JSON.stringify(this.courses));
+        }
       }
     }
   }
+
 })
 
 Vue.component('add-course', {
   props: ['logedInUser'],
   data: function() {
     return {
+      id: 0,
       courses: [],
       topic: '',
       description: '',
@@ -189,7 +201,7 @@ Vue.component('add-course', {
       postcode: '',
       day: '',
       time: '',
-      length: 0,
+      length: null,
       counties: ['hendon',
                  'colindale',
                  'barnet'],
@@ -228,7 +240,7 @@ Vue.component('add-course', {
             <slot name="body">
             <form>
               <label for="topic">Topic</label></br>
-              <select v-model="topic" id="topic">
+              <select v-model="topic" id="topic" required>
                 <option v-for="topic in topics">{{topic}}</option>
               </select> </br>
 
@@ -236,7 +248,7 @@ Vue.component('add-course', {
               <input id="price" v-model.number='price' required></br>
 
               <label for="counties">Location</label></br>
-              <select v-model="county" id="counties">
+              <select v-model="county" id="counties" required>
                 <option v-for="county in counties">{{county}}</option>
               </select> </br>
 
@@ -244,7 +256,7 @@ Vue.component('add-course', {
               <input id="postcode" v-model='postcode' required></br>
 
               <label for="days">Days</label></br>
-              <select v-model="day" id="days">
+              <select v-model="day" id="days" required>
                 <option v-for="day in days">{{day}}</option>
               </select> </br>
 
@@ -255,7 +267,7 @@ Vue.component('add-course', {
               <input id="length" v-model.number='length' required></br>
 
               <label for="description">Description</label></br>
-              <input type="text" id="description" v-model='description'></br>
+              <input type="text" id="description" v-model='description' required></br>
 
               <button v-on:click="addCourse">ADD COURSE</button>
             </form>
@@ -275,22 +287,32 @@ Vue.component('add-course', {
     </div>
   </transition>`,
 
+  computed: {
+
+  },
+
   methods: {
 
     addCourse: function() {
       this.getCourses();
-      this.courses.push({
-        topic: this.topic,
-        price: this.price,
-        county: this.county,
-        postcode: this.postcode,
-        day: this.day,
-        time: this.time,
-        length: this.length,
-        description: this.description,
-        author: this.logedInUser
-      });
-      localStorage.setItem("courses", JSON.stringify(this.courses));
+      if(this.topic !== '' && this.price !== null && this.county !== '' &&
+         this.postcode !== '' && this.day !== '' && this.time !== '' &&
+         this.length !== null && this.description !== '') {
+           this.setId();
+           this.courses.push({
+             id: this.id,
+             topic: this.topic,
+             price: this.price,
+             county: this.county,
+             postcode: this.postcode,
+             day: this.day,
+             time: this.time,
+             length: this.length,
+             description: this.description,
+             author: this.logedInUser
+           });
+           localStorage.setItem("courses", JSON.stringify(this.courses));
+         }
     },
 
     getCourses: function() {
@@ -300,11 +322,27 @@ Vue.component('add-course', {
       } else {
         this.courses = JSON.parse(localStorage.getItem("courses"));
       }
+    },
+
+    setId: function() {
+      var courseId = 0;
+        if(this.courses.length !== 0 && this.courses.length !== 1) {
+          for(let course = 1; course < this.courses.length; course++) {
+            if(this.courses[course].id >= this.courses[course - 1].id) {
+              courseId = this.courses[course].id;
+            } else {
+              courseId = this.courses[course - 1].id;
+            }
+          }
+          this.id = courseId + 1;
+        } else if(this.courses.length === 1){
+          courseId = this.courses[0].id;
+          this.id = courseId + 1;
+        } else {
+          this.id = courseId;
+        }
     }
-
   }
-
-
 })
 
 Vue.component('log-in', {
